@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ElectroQuest – Petualangan Listrik</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root {
+    --yellow: #FFD93D;
+    --green: #2ECC71;
+    --green-dark: #1a8a4a;
+    --orange: #F39C12;
+    --red: #E74C3C;
+    --blue: #2980B9;
+    --blue-dark: #1a5276;
+    --purple: #8E44AD;
+    --bg: #0a0e1a;
+    --card: #141929;
+    --card2: #1c2438;
+    --text: #EEF2FF;
+    --muted: #8892b0;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  /* Stars background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 15%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 80%, rgba(255,255,255,0.35) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 60%, rgba(255,255,255,0.25) 0%, transparent 100%),
+      radial-gradient(1px 1px at 10% 65%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(60px 60px at 15% 20%, rgba(41,128,185,0.08) 0%, transparent 100%),
+      radial-gradient(80px 80px at 80% 70%, rgba(142,68,173,0.08) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .screen {
+    display: none;
+    width: 100%;
+    max-width: 680px;
+    position: relative;
+    z-index: 1;
+    animation: fadeIn 0.4s ease;
+  }
+  .screen.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: var(--card);
+    border-radius: var(--radius) var(--radius) 0 0;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-bottom: none;
+  }
+  .topbar-title { font-family: 'Bangers', cursive; font-size: 20px; letter-spacing: 1px; color: var(--yellow); }
+  .score-box { background: rgba(255,217,61,0.12); border: 1px solid rgba(255,217,61,0.3); border-radius: 99px; padding: 4px 14px; font-size: 13px; font-weight: 700; color: var(--yellow); }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--radius);
+    padding: 28px 28px;
+    width: 100%;
+  }
+  .card-inner {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--radius);
+    padding: 28px;
+    border-radius: 0 0 var(--radius) var(--radius);
+  }
+
+  /* ── BERANDA ── */
+  .hero-title {
+    font-family: 'Bangers', cursive;
+    font-size: 56px;
+    line-height: 1;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .hero-title span { color: var(--yellow); }
+  .hero-sub { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+  .hero-icon { text-align: center; font-size: 72px; margin-bottom: 16px; }
+
+  .desc-box {
+    background: var(--card2);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .btn { 
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 14px 20px;
+    border: none; border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px; font-weight: 700;
+    cursor: pointer; margin-bottom: 10px;
+    transition: transform 0.15s, filter 0.15s;
+  }
+  .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+  .btn:active { transform: translateY(0); }
+  .btn-green  { background: var(--green);  color: #fff; }
+  .btn-blue   { background: var(--blue);   color: #fff; }
+  .btn-purple { background: var(--purple); color: #fff; }
+  .btn-yellow { background: var(--yellow); color: #1a1a1a; }
+  .btn-gray   { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid rgba(255,255,255,0.1); }
+  .btn-orange { background: var(--orange); color: #fff; }
+  .btn-red    { background: var(--red);    color: #fff; }
+
+  .btn-icon { font-size: 18px; }
+
+  /* ── LOGIN ── */
+  .form-label { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%; padding: 12px 14px;
+    background: var(--card2); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; color: var(--text);
+    font-family: 'Nunito', sans-serif; font-size: 15px;
+    margin-bottom: 18px;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { outline: none; border-color: var(--yellow); }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    background: linear-gradient(135deg, var(--blue-dark), var(--purple));
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-header .num {
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px;
+  }
+  .section-header .title { font-weight: 700; font-size: 15px; }
+  .section-header .sub { font-size: 12px; opacity: 0.75; }
+
+  /* ── NARASI ── */
+  .narasi-box {
+    background: var(--card2);
+    border-left: 3px solid var(--yellow);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    font-size: 14px; line-height: 1.75;
+    color: var(--text); margin-bottom: 22px;
+  }
+  .narasi-box .char-name { font-weight: 800; color: var(--yellow); }
+
+  /* ── PILIHAN ── */
+  .pilihan-label { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 12px; }
+  .choice-btn {
+    display: flex; align-items: flex-start; gap: 12px;
+    width: 100%; padding: 14px 16px;
+    background: var(--card2);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 10px; color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; margin-bottom: 10px; text-align: left;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  }
+  .choice-btn:hover { border-color: var(--yellow); background: rgba(255,217,61,0.06); transform: translateX(4px); }
+  .choice-key {
+    min-width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 13px;
+    flex-shrink: 0;
+  }
+  .key-a { background: rgba(46,204,113,0.2); color: var(--green); }
+  .key-b { background: rgba(243,156,18,0.2); color: var(--orange); }
+  .key-c { background: rgba(231,76,60,0.2); color: var(--red); }
+
+  /* ── FEEDBACK ── */
+  .feedback-box {
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+    animation: popIn 0.3s ease;
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .feedback-box.benar { background: rgba(46,204,113,0.1); border: 1.5px solid var(--green); }
+  .feedback-box.hampir { background: rgba(243,156,18,0.1); border: 1.5px solid var(--orange); }
+  .feedback-box.salah  { background: rgba(231,76,60,0.1);  border: 1.5px solid var(--red); }
+  .feedback-icon { font-size: 36px; margin-bottom: 10px; }
+  .feedback-title { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+  .feedback-box.benar  .feedback-title { color: var(--green); }
+  .feedback-box.hampir .feedback-title { color: var(--orange); }
+  .feedback-box.salah  .feedback-title { color: var(--red); }
+  .feedback-body { font-size: 13px; line-height: 1.7; color: var(--text); }
+
+  /* ── KALKULATOR ── */
+  .calc-box {
+    background: var(--card2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 18px;
+  }
+  .calc-soal { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .calc-circuit {
+    background: rgba(41,128,185,0.1);
+    border: 1px solid rgba(41,128,185,0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--blue);
+    margin-bottom: 14px;
+    font-weight: 700;
+  }
+  .rumus-box {
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .rumus-box span { color: var(--yellow); font-weight: 800; }
+  .calc-input-row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 14px; }
+  .calc-input {
+    flex: 1; padding: 11px 14px;
+    background: var(--bg); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px; color: var(--text);
+    font-size: 22px; font-weight: 800;
+    font-family: 'Nunito', sans-serif; text-align: center;
+  }
+  .calc-unit { font-size: 14px; font-weight: 700; color: var(--muted); padding-bottom: 12px; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap { margin-bottom: 20px; }
+  .progress-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .progress-bar { height: 6px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--blue), var(--green)); transition: width 0.6s ease; }
+
+  /* ── BADGE & SCORE ── */
+  .result-row {
+    display: flex; gap: 14px;
+    background: var(--card2);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  .score-big { font-family: 'Bangers', cursive; font-size: 48px; color: var(--yellow); line-height: 1; }
+  .score-sub { font-size: 12px; color: var(--muted); }
+  .badge-box {
+    background: rgba(142,68,173,0.15);
+    border: 1px solid rgba(142,68,173,0.3);
+    border-radius: 10px;
+    padding: 10px 14px;
+    text-align: center;
+    flex: 1;
+  }
+  .badge-icon { font-size: 28px; }
+  .badge-name { font-size: 12px; font-weight: 700; color: #c084fc; margin-top: 4px; }
+
+  /* ── WORLD MAP ── */
+  .world-map {
+    display: flex; gap: 0;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+  }
+  .world-node {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .world-circle {
+    width: 54px; height: 54px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    border: 2.5px solid;
+  }
+  .world-circle.done  { background: rgba(46,204,113,0.2); border-color: var(--green); }
+  .world-circle.active { background: rgba(41,128,185,0.2); border-color: var(--blue); animation: pulse 1.5s infinite; }
+  .world-circle.locked { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); filter: grayscale(1); }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(41,128,185,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(41,128,185,0); }
+  }
+  .world-name { font-size: 11px; font-weight: 700; color: var(--muted); text-align: center; }
+  .world-line { flex: 1; height: 2px; background: rgba(255,255,255,0.1); max-width: 40px; }
+  .world-line.done { background: var(--green); }
+
+  /* ── REMEDIAL ── */
+  .remedial-box {
+    background: rgba(231,76,60,0.08);
+    border: 1px solid rgba(231,76,60,0.25);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .remedial-title { font-size: 14px; font-weight: 800; color: var(--red); margin-bottom: 10px; }
+  .remedial-body { font-size: 13px; line-height: 1.75; color: var(--text); }
+  .formula-display {
+    background: rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--yellow);
+    text-align: center;
+    margin: 10px 0;
+    letter-spacing: 2px;
+  }
+
+  /* divider */
+  .divider { height: 1px; background: rgba(255,255,255,0.06); margin: 20px 0; }
+
+  /* name display */
+  #nama-display { font-weight: 800; color: var(--yellow); }
+
+  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; text-align: center; }
+
+  /* POIN POPUP */
+  .poin-popup {
+    position: fixed; top: 30%; left: 50%; transform: translateX(-50%);
+    background: var(--green); color: #fff;
+    font-family: 'Bangers', cursive; font-size: 36px;
+    padding: 10px 28px; border-radius: 99px;
+    z-index: 999; pointer-events: none;
+    animation: poinAnim 1.4s forwards;
+  }
+  @keyframes poinAnim {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(0); }
+    20%  { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+    80%  { opacity: 1; transform: translateX(-50%) translateY(-30px); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-50px); }
+  }
+
+  /* step indicator */
+  .step-dots {
+    display: flex; gap: 6px; justify-content: center; margin-bottom: 18px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.12); }
+  .dot.active { background: var(--yellow); }
+  .dot.done   { background: var(--green); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     SCREEN 1: BERANDA
+══════════════════════════════════════ -->
+<div id="s-beranda" class="screen active">
+  <div class="card">
+    <div class="hero-icon">⚡</div>
+    <div class="hero-title">PETUALANGAN<br><span>LISTRIK</span></div>
+    <div class="hero-sub">Belajar Fisika jadi seru!</div>
+
+    <div class="desc-box">
+      Selamat datang! Kamu akan menyelesaikan berbagai kasus kelistrikan dalam kehidupan nyata.
+      Setiap pilihanmu menentukan alur cerita dan menguji pemahamanmu tentang <strong>Listrik Dinamis</strong>.
+    </div>
+
+    <div class="world-map">
+      <div class="world-node">
+        <div class="world-circle active">🏪</div>
+        <div class="world-name">Kasus 1<br>Toko Pak Hasan</div>
+      </div>
+      <div class="world-line"></div>
+      <div class="world-node">
+        <div class="world-circle locked">💡</div>
+        <div class="world-name">Kasus 2<br>Lampu Berkedip</div>
+      </div>
+      <div class="world-line"></div>
+      <div class="world-node">
+        <div class="world-circle locked">🔌</div>
+        <div class="world-name">Kasus 3<br>Tagihan Ibu Sari</div>
+      </div>
+    </div>
+
+    <button class="btn btn-green" onclick="goto('s-login')">
+      <span class="btn-icon">▶</span> MULAI PETUALANGAN
+    </button>
+    <button class="btn btn-gray" onclick="goto('s-petunjuk')">
+      <span class="btn-icon">📖</span> PETUNJUK
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 1B: PETUNJUK
+══════════════════════════════════════ -->
+<div id="s-petunjuk" class="screen">
+  <div class="card">
+    <div class="section-header">
+      <div class="num">?</div>
+      <div><div class="title">Cara Bermain</div></div>
+    </div>
+    <div class="narasi-box" style="border-color: var(--blue);">
+      <p style="margin-bottom: 10px;">📌 Kamu akan menghadapi <strong>3 kasus kelistrikan</strong> nyata di kota Voltara.</p>
+      <p style="margin-bottom: 10px;">🟢 <strong>Pilihan A</strong> = Jawaban benar → +100 poin, lanjut ke simpul berikutnya.</p>
+      <p style="margin-bottom: 10px;">🟡 <strong>Pilihan B</strong> = Hampir benar → feedback, coba lagi.</p>
+      <p style="margin-bottom: 10px;">🔴 <strong>Pilihan C</strong> = Salah → jalur remedial, pelajari konsepnya.</p>
+      <p>🧮 Ada soal <strong>perhitungan</strong> yang perlu kamu selesaikan dengan rumus.</p>
+    </div>
+    <button class="btn btn-blue" onclick="goto('s-login')">
+      <span class="btn-icon">▶</span> Mulai Sekarang
+    </button>
+    <button class="btn btn-gray" onclick="goto('s-beranda')">← Kembali</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 2: LOGIN
+══════════════════════════════════════ -->
+<div id="s-login" class="screen">
+  <div class="card">
+    <div class="section-header">
+      <div class="num">👤</div>
+      <div>
+        <div class="title">Masukkan Identitasmu</div>
+        <div class="sub">Data disimpan untuk progres & skor</div>
+      </div>
+    </div>
+
+    <label class="form-label">Nama Lengkap</label>
+    <input class="form-input" id="input-nama" type="text" placeholder="Masukkan namamu..." />
+
+    <label class="form-label">Kelas</label>
+    <input class="form-input" id="input-kelas" type="text" placeholder="Contoh: IX A" />
+
+    <button class="btn btn-green" onclick="doLogin()">
+      <span class="btn-icon">✓</span> MASUK
+    </button>
+    <p class="hint">Data hanya digunakan dalam sesi ini.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 3: KASUS 1 – NARASI PEMBUKA
+══════════════════════════════════════ -->
+<div id="s-k1-intro" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">⚡ ElectroQuest</span>
+    <span class="score-box">⭐ <span id="score-k1">0</span> poin</span>
+  </div>
+  <div class="card-inner">
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Kasus 1 – Toko Pak Hasan</span><span>Simpul 1/2</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:10%"></div></div>
+    </div>
+
+    <div class="section-header">
+      <div class="num">🏪</div>
+      <div>
+        <div class="title">Kasus 1: Toko Pak Hasan</div>
+        <div class="sub">Dunia 1 · Hukum Ohm & Hambatan</div>
+      </div>
+    </div>
+
+    <div class="narasi-box">
+      <p>Kamu tiba di <strong>Toko Pak Hasan</strong> yang biasanya ramai. Tapi hari ini suasananya gelap dan murung.</p>
+      <br>
+      <p><span class="char-name">Pak Hasan:</span> "Aduh, <span id="nama-display-k1">Raka</span>! Lampu tokonya redup semua sejak tadi pagi. Aku curiga ada masalah pada rangkaian listrik. Bisakah kamu membantu?"</p>
+      <br>
+      <p>Kamu mengambil multimeter dan mulai memeriksa rangkaian...</p>
+    </div>
+
+    <button class="btn btn-blue" onclick="goto('s-k1-q1')">
+      <span class="btn-icon">🔍</span> Mulai Investigasi
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 4: KASUS 1 – PERTANYAAN 1
+══════════════════════════════════════ -->
+<div id="s-k1-q1" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">⚡ ElectroQuest</span>
+    <span class="score-box">⭐ <span id="score-k1-q1">0</span> poin</span>
+  </div>
+  <div class="card-inner">
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Simpul Keputusan 1 – Analisis Awal</span><span>1/2</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+    </div>
+
+    <div class="narasi-box">
+      <p>Setelah memeriksa rangkaian, kamu menemukan bahwa lampu-lampu terhubung dalam satu jalur seri. Tegangan sumber 12V, dan setiap lampu memiliki hambatan 6Ω.</p>
+    </div>
+
+    <p class="pilihan-label">❓ Apa kemungkinan penyebab utama lampu redup?</p>
+
+    <button class="choice-btn" onclick="k1q1Pilih('A')">
+      <div class="choice-key key-a">A</div>
+      <div>Hambatan terlalu besar dalam rangkaian, sehingga arus yang mengalir kecil</div>
+    </button>
+    <button class="choice-btn" onclick="k1q1Pilih('B')">
+      <div class="choice-key key-b">B</div>
+      <div>Tegangan sumber sedikit menurun karena kabel terlalu panjang</div>
+    </button>
+    <button class="choice-btn" onclick="k1q1Pilih('C')">
+      <div class="choice-key key-c">C</div>
+      <div>Tidak ada arus listrik yang mengalir sama sekali dalam rangkaian</div>
+    </button>
+  </div>
+</div>
+
+<!-- FEEDBACK A (BENAR) -->
+<div id="s-k1-q1-a" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">⚡ ElectroQuest</span>
+    <span class="score-box">⭐ <span id="score-k1-a">0</span> poin</span>
+  </div>
+  <div class="card-inner">
+    <div class="feedback-box benar">
+      <div class="feedback-icon">✅</div>
+      <div class="feedback-title">Tepat! +100 Poin</div>
+      <div class="feedback-body">
+        Benar! Hambatan yang besar pada rangkaian seri menyebabkan arus (I) yang mengalir menjadi kecil. Karena lampu bergantung pada arus yang melewatinya, lampu menjadi redup. Ini sesuai Hukum Ohm: <strong>I = V/R</strong>. Semakin besar R, semakin kecil I.
+      </div>
+    </div>
+    <div class="narasi-box">
+      <p><span class="char-name">Pak Hasan:</span> "Ohh! Jadi hambatannya terlalu besar ya? Lalu berapa sebenarnya arus yang mengalir? Coba hitung dulu!"</p>
+    </div>
+    <button class="btn btn-green" onclick="goto('s-k1-q2')">
+      <span class="btn-icon">→</span> Lanjut ke Simpul 2 (Perhitungan)
+    </button>
+  </div>
+</div>
+
+<!-- FEEDBACK B (HAMPIR BENAR) -->
+<div id="s-k1-q1-b" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">⚡ ElectroQuest</span>
+    <span class="score-box">⭐ <span id="score-k1-b">0</span> poin</span>
+  </div>
+  <div class="card-inner">
+    <div class="feedback-box hampir">
+      <div class="feedback-icon">⚠️</div>
+      <div class="feedback-title">Hampir Benar!</div>
+      <div class="feedback-body">
+        Tegangan memang berpengaruh pada kecerahan lampu, tapi dalam soal ini tegangan sumber tetap 12V. Coba pikirkan: apa yang menghambat aliran arus dalam rangkaian seri? Hubungkan hambatan (R) dengan arus (I)!
+      </div>
+    </div>
+    <button class="btn btn-orange" onclick="goto('s-k1-q1')">
+      <span class="btn-icon">🔄</span> Coba Lagi
+    </button>
+  </div>
+</div>
+
+<!-- FEEDBACK C (SALAH) → REMEDIAL -->
+<div id="s-k1-q1-c" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">⚡ ElectroQuest</span>
+    <span class="score-box">⭐ <span id="score-k1-c">0</span> poin</span>
+  </div>
+  <div class="card-inner">
+    <div class="feedback-box salah">
+      <div class="feedback-icon">❌</div>
+      <div class="feedback-title">Belum Tepat</div>
+      <div class="feedback-body">
+        Jika tidak ada arus sama sekali, lampu tidak akan menyala sama sekali — bukan redup. Lampu yang redup menunjukkan ada arus, tapi kecil. Mari pelajari konsepnya!
+      </div>
+    </div>
+    <div class="remedial-box">
+      <div class="remedial-title">📚 Jalur Remedial – Hukum Ohm</div>
+      <div class="remedial-body">
+        <p>Arus listrik (I) adalah aliran muatan listrik. Jika ada arus, lampu menyala. Jika arus kecil, lampu redup.</p>
+        <div class="formula-display">I = V / R</div>
+        <p>Hambatan (R) yang besar → arus (I) kecil → lampu redup. Hambatan yang sangat besar → lampu hampir mati, bukan mati total.</p>
+      </div>
+    </div>
+    <button class="btn btn-red" onclick="goto('s-k1-q1')">
+      <span class="btn-icon">🔄</span> Kembali ke Pertanyaan
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 5: KASUS 1 – SIMPUL 2 (HITUNG)
+══════════════════════════════════════ -->
+<div id="s-k1-q2" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">⚡ ElectroQuest</span>
+    <span class="score-box">⭐ <span id="score-k1-q2">0</span> poin</span>
+  </div>
+  <div class="card-inner">
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Simpul Keputusan 2 – Perhitungan</span><span>2/2</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-soal">Diketahui:</div>
+      <div class="calc-circuit">⚡ Tegangan (V) = 12 V &nbsp;|&nbsp; 🔴 Hambatan (R) = 6 Ω</div>
+      <div class="rumus-box">Rumus: <span>I = V / R</span></div>
+      <div class="calc-soal" style="margin-bottom:12px;">Hitung besar arus listrik (I) dalam rangkaian!</div>
+      <div class="calc-input-row">
+        <input class="calc-input" id="jawaban-hitung" type="number" step="0.1" placeholder="?" />
+        <div class="calc-unit">Ampere (A)</div>
+      </div>
+    </div>
+
+    <button class="btn btn-blue" onclick="cekJawaban()">
+      <span class="btn-icon">✓</span> CEK JAWABAN
+    </button>
+
+    <div id="feedback-hitung" style="margin-top: 16px; display: none;"></div>
+    <div id="btn-lanjut-k1" style="display:none; margin-top:12px;">
+      <button class="btn btn-green" onclick="selesaiKasus1()">
+        <span class="btn-icon">🎉</span> Lihat Hasil Kasus 1
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 6: SELESAI KASUS 1
+══════════════════════════════════════ -->
+<div id="s-k1-selesai" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">⚡ ElectroQuest</span>
+    <span class="score-box">⭐ <span id="score-final-k1">0</span> poin</span>
+  </div>
+  <div class="card-inner">
+    <div class="section-header" style="background: linear-gradient(135deg, #1a8a4a, #2980B9);">
+      <div class="num">🎉</div>
+      <div>
+        <div class="title">Kasus 1 Selesai!</div>
+        <div class="sub">Toko Pak Hasan kembali terang!</div>
+      </div>
+    </div>
+
+    <div class="narasi-box" style="border-color: var(--green);">
+      <p><span class="char-name">Pak Hasan:</span> "Berkat bantuanmu, <span id="nama-selesai">Raka</span>! Rangkaian listriknya sudah diperbaiki. Lampu kembali terang dan toko ramai lagi. Terima kasih, Teknisi Muda!"</p>
+    </div>
+
+    <div class="result-row">
+      <div>
+        <div class="score-big" id="skor-k1-display">0</div>
+        <div class="score-sub">Skor Kasus 1</div>
+      </div>
+      <div class="badge-box">
+        <div class="badge-icon">🏅</div>
+        <div class="badge-name">Ahli Rangkaian Dasar</div>
+      </div>
+    </div>
+
+    <div class="world-map" style="margin: 16px 0;">
+      <div class="world-node">
+        <div class="world-circle done">🏪</div>
+        <div class="world-name">Kasus 1<br>✓ Selesai</div>
+      </div>
+      <div class="world-line done"></div>
+      <div class="world-node">
+        <div class="world-circle active">💡</div>
+        <div class="world-name">Kasus 2<br>Aktif!</div>
+      </div>
+      <div class="world-line"></div>
+      <div class="world-node">
+        <div class="world-circle locked">🔌</div>
+        <div class="world-name">Kasus 3<br>Terkunci</div>
+      </div>
+    </div>
+
+    <button class="btn btn-green" onclick="goto('s-k2-intro')">
+      <span class="btn-icon">→</span> LANJUT KE KASUS 2
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 7: KASUS 2 – INTRO
+══════════════════════════════════════ -->
+<div id="s-k2-intro" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">⚡ ElectroQuest</span>
+    <span class="score-box">⭐ <span id="score-k2-intro">0</span> poin</span>
+  </div>
+  <div class="card-inner">
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Kasus 2 – Lampu Berkedip</span><span>Simpul 1/2</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:10%"></div></div>
+    </div>
+
+    <div class="section-header" style="background: linear-gradient(135deg, #7b3f00, var(--orange));">
+      <div class="num">💡</div>
+      <div>
+        <div class="title">Kasus 2: Lampu Berkedip Misterius</div>
+        <div class="sub">Dunia 2 · Rangkaian Seri & Hambatan Total</div>
+      </div>
+    </div>
+
+    <div class="narasi-box">
+      <p>Kamu kini berada di rumah <strong>Bu Dewi</strong>. Lampu ruang tamunya berkedip-kedip secara acak setiap malam.</p>
+      <br>
+      <p><span class="char-name">Bu Dewi:</span> "Tolong <span id="nama-display-k2">Raka</span>, lampunya aneh sekali. Sudah 3 hari begini. Apa yang salah?"</p>
+      <br>
+      <p>Kamu memeriksa dan menemukan 3 lampu terpasang secara <strong>seri</strong> dengan hambatan berbeda-beda: Lampu 1 = 4Ω, Lampu 2 = 6Ω, Lampu 3 = 2Ω. Sumber tegangan 24V.</p>
+    </div>
+
+    <button class="btn btn-orange" onclick="goto('s-k2-q1')">
+      <span class="btn-icon">🔍</span> Mulai Investigasi Kasus 2
+    </button>
+  </div>
+</div>
+
+<!-- KASUS 2 – PERTANYAAN 1 -->
+<div id="s-k2-q1" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">⚡ ElectroQuest</span>
+    <span class="score-box">⭐ <span id="score-k2-q1">0</span> poin</span>
+  </div>
+  <div class="card-inner">
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Simpul 1 – Hambatan Total Seri</span><span>1/2</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+    </div>
+
+    <div class="narasi-box">
+      <p>Tiga lampu terpasang seri: R1 = 4Ω, R2 = 6Ω, R3 = 2Ω. Tegangan = 24V.</p>
+    </div>
+
+    <p class="pilihan-label">❓ Berapa hambatan total rangkaian seri tersebut?</p>
+
+    <button class="choice-btn" onclick="k2q1Pilih('A')">
+      <div class="choice-key key-a">A</div>
+      <div>12 Ω — dijumlah semua hambatan (4 + 6 + 2)</div>
+    </button>
+    <button class="choice-btn" onclick="k2q1Pilih('B')">
+      <div class="choice-key key-b">B</div>
+      <div>4 Ω — hambatan yang terbesar saja yang dihitung</div>
+    </button>
+    <button class="choice-btn" onclick="k2q1Pilih('C')">
+      <div class="choice-key key-c">C</div>
+      <div>2 Ω — hambatan yang terkecil yang menentukan</div>
+    </button>
+  </div>
+</div>
+
+<!-- K2 Q1 FEEDBACK A (BENAR) -->
+<div id="s-k2-q1-a" class="screen">
+  <div class="topbar"><span class="topbar-title">⚡ ElectroQuest</span><span class="score-box">⭐ <span id="score-k2-a">0</span> poin</span></div>
+  <div class="card-inner">
+    <div class="feedback-box benar">
+      <div class="feedback-icon">✅</div>
+      <div class="feedback-title">Benar! +100 Poin</div>
+      <div class="feedback-body">
+        Tepat! Pada rangkaian seri, hambatan total = R1 + R2 + R3 = 4 + 6 + 2 = <strong>12Ω</strong>. Setiap hambatan dijumlahkan karena arus melewati semua hambatan secara berurutan.
+      </div>
+    </div>
+    <div class="narasi-box">
+      <p><span class="char-name">Bu Dewi:</span> "Oh begitu! Lalu berapa arus yang mengalir ke lampuku?"</p>
+    </div>
+    <button class="btn btn-green" onclick="goto('s-k2-q2')">
+      <span class="btn-icon">→</span> Lanjut ke Perhitungan Arus
+    </button>
+  </div>
+</div>
+
+<!-- K2 Q1 FEEDBACK B (HAMPIR) -->
+<div id="s-k2-q1-b" class="screen">
+  <div class="topbar"><span class="topbar-title">⚡ ElectroQuest</span><span class="score-box">⭐ <span id="score-k2-b">0</span> poin</span></div>
+  <div class="card-inner">
+    <div class="feedback-box hampir">
+      <div class="feedback-icon">⚠️</div>
+      <div class="feedback-title">Hampir Benar!</div>
+      <div class="feedback-body">
+        Pada rangkaian seri, arus melewati SEMUA hambatan, bukan hanya yang terbesar. Coba jumlahkan seluruh hambatan!
+      </div>
+    </div>
+    <button class="btn btn-orange" onclick="goto('s-k2-q1')">🔄 Coba Lagi</button>
+  </div>
+</div>
+
+<!-- K2 Q1 FEEDBACK C (SALAH) -->
+<div id="s-k2-q1-c" class="screen">
+  <div class="topbar"><span class="topbar-title">⚡ ElectroQuest</span><span class="score-box">⭐ <span id="score-k2-c">0</span> poin</span></div>
+  <div class="card-inner">
+    <div class="feedback-box salah">
+      <div class="feedback-icon">❌</div>
+      <div class="feedback-title">Belum Tepat</div>
+      <div class="feedback-body">Hambatan terkecil tidak menentukan hambatan total. Itu berlaku untuk rangkaian paralel. Pada seri, semua hambatan dijumlah!</div>
+    </div>
+    <div class="remedial-box">
+      <div class="remedial-title">📚 Remedial – Rangkaian Seri</div>
+      <div class="remedial-body">
+        <div class="formula-display">Rtotal = R1 + R2 + R3</div>
+        <p>Pada rangkaian seri, arus hanya punya satu jalur, sehingga melewati semua hambatan. Total hambatan = jumlah semua hambatan.</p>
+      </div>
+    </div>
+    <button class="btn btn-red" onclick="goto('s-k2-q1')">🔄 Kembali ke Pertanyaan</button>
+  </div>
+</div>
+
+<!-- KASUS 2 – SIMPUL 2 (HITUNG ARUS) -->
+<div id="s-k2-q2" class="screen">
+  <div class="topbar"><span class="topbar-title">⚡ ElectroQuest</span><span class="score-box">⭐ <span id="score-k2-q2">0</span> poin</span></div>
+  <div class="card-inner">
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Simpul 2 – Hitung Arus</span><span>2/2</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+    </div>
+    <div class="calc-box">
+      <div class="calc-soal">Diketahui:</div>
+      <div class="calc-circuit">⚡ Tegangan (V) = 24 V &nbsp;|&nbsp; 🔴 Hambatan Total (R) = 12 Ω</div>
+      <div class="rumus-box">Rumus: <span>I = V / R</span></div>
+      <div class="calc-soal" style="margin-bottom:12px;">Hitung besar arus yang mengalir!</div>
+      <div class="calc-input-row">
+        <input class="calc-input" id="jawaban-k2" type="number" step="0.1" placeholder="?" />
+        <div class="calc-unit">Ampere (A)</div>
+      </div>
+    </div>
+    <button class="btn btn-blue" onclick="cekJawabanK2()">✓ CEK JAWABAN</button>
+    <div id="feedback-k2" style="margin-top:16px; display:none;"></div>
+    <div id="btn-lanjut-k2" style="display:none; margin-top:12px;">
+      <button class="btn btn-green" onclick="selesaiKasus2()">🎉 Lihat Hasil Kasus 2</button>
+    </div>
+  </div>
+</div>
+
+<!-- SELESAI KASUS 2 -->
+<div id="s-k2-selesai" class="screen">
+  <div class="topbar"><span class="topbar-title">⚡ ElectroQuest</span><span class="score-box">⭐ <span id="score-final-k2">0</span> poin</span></div>
+  <div class="card-inner">
+    <div class="section-header" style="background: linear-gradient(135deg, #7b3f00, #2980B9);">
+      <div class="num">🎉</div>
+      <div><div class="title">Kasus 2 Selesai!</div><div class="sub">Lampu Bu Dewi kembali normal!</div></div>
+    </div>
+    <div class="narasi-box" style="border-color: var(--orange);">
+      <p><span class="char-name">Bu Dewi:</span> "Wah luar biasa! Terima kasih sudah menjelaskan masalah rangkaian seriku!"</p>
+    </div>
+    <div class="result-row">
+      <div><div class="score-big" id="skor-k2-display">0</div><div class="score-sub">Total Skor</div></div>
+      <div class="badge-box"><div class="badge-icon">⚡</div><div class="badge-name">Ahli Rangkaian Seri</div></div>
+    </div>
+    <div class="world-map" style="margin:16px 0;">
+      <div class="world-node"><div class="world-circle done">🏪</div><div class="world-name">Kasus 1<br>✓</div></div>
+      <div class="world-line done"></div>
+      <div class="world-node"><div class="world-circle done">💡</div><div class="world-name">Kasus 2<br>✓</div></div>
+      <div class="world-line done"></div>
+      <div class="world-node"><div class="world-circle active">🔌</div><div class="world-name">Kasus 3<br>Aktif!</div></div>
+    </div>
+    <button class="btn btn-green" onclick="goto('s-k3-intro')">→ LANJUT KE KASUS 3</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     KASUS 3: TAGIHAN IBU SARI
+══════════════════════════════════════ -->
+<div id="s-k3-intro" class="screen">
+  <div class="topbar"><span class="topbar-title">⚡ ElectroQuest</span><span class="score-box">⭐ <span id="score-k3-intro">0</span> poin</span></div>
+  <div class="card-inner">
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Kasus 3 – Tagihan Ibu Sari</span><span>Simpul 1/2</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:10%"></div></div>
+    </div>
+    <div class="section-header" style="background: linear-gradient(135deg, #4a0080, #8E44AD);">
+      <div class="num">🔌</div>
+      <div>
+        <div class="title">Kasus 3: Tagihan Ibu Sari</div>
+        <div class="sub">Dunia 3 · Rangkaian Paralel & Daya Listrik</div>
+      </div>
+    </div>
+    <div class="narasi-box">
+      <p><strong>Ibu Sari</strong> kaget melihat tagihan listriknya naik dua kali lipat bulan ini!</p>
+      <br>
+      <p><span class="char-name">Ibu Sari:</span> "Tolong <span id="nama-display-k3">Raka</span>! Tagihan listrikku sangat mahal. Aku punya TV 100W, kulkas 150W, dan AC 400W yang semuanya terhubung paralel ke sumber 220V."</p>
+      <br>
+      <p>Kamu harus membantu Ibu Sari memahami daya listrik dan rangkaian paralel.</p>
+    </div>
+    <button class="btn btn-purple" onclick="goto('s-k3-q1')">🔍 Mulai Investigasi Kasus 3</button>
+  </div>
+</div>
+
+<!-- KASUS 3 – Q1 -->
+<div id="s-k3-q1" class="screen">
+  <div class="topbar"><span class="topbar-title">⚡ ElectroQuest</span><span class="score-box">⭐ <span id="score-k3-q1">0</span> poin</span></div>
+  <div class="card-inner">
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Simpul 1 – Sifat Rangkaian Paralel</span><span>1/2</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+    </div>
+    <div class="narasi-box">
+      <p>TV, kulkas, dan AC terpasang paralel ke sumber 220V.</p>
+    </div>
+    <p class="pilihan-label">❓ Apa yang BENAR tentang rangkaian paralel di rumah Ibu Sari?</p>
+    <button class="choice-btn" onclick="k3q1Pilih('A')">
+      <div class="choice-key key-a">A</div>
+      <div>Setiap perangkat mendapat tegangan 220V, dan arusnya berbeda-beda sesuai dayanya</div>
+    </button>
+    <button class="choice-btn" onclick="k3q1Pilih('B')">
+      <div class="choice-key key-b">B</div>
+      <div>Tegangan dibagi rata ke semua perangkat, masing-masing dapat 220/3 ≈ 73V</div>
+    </button>
+    <button class="choice-btn" onclick="k3q1Pilih('C')">
+      <div class="choice-key key-c">C</div>
+      <div>Arus yang mengalir sama besar ke semua perangkat</div>
+    </button>
+  </div>
+</div>
+
+<!-- K3 Q1 A -->
+<div id="s-k3-q1-a" class="screen">
+  <div class="topbar"><span class="topbar-title">⚡ ElectroQuest</span><span class="score-box">⭐ <span id="score-k3-a">0</span> poin</span></div>
+  <div class="card-inner">
+    <div class="feedback-box benar">
+      <div class="feedback-icon">✅</div>
+      <div class="feedback-title">Benar! +100 Poin</div>
+      <div class="feedback-body">Tepat! Pada rangkaian paralel, tegangan di setiap cabang SAMA (220V). Namun arus berbeda-beda karena hambatan tiap perangkat berbeda. I = P/V, jadi AC punya arus terbesar.</div>
+    </div>
+    <div class="narasi-box">
+      <p><span class="char-name">Ibu Sari:</span> "Oh! Jadi berapa total daya yang aku pakai setiap jam?"</p>
+    </div>
+    <button class="btn btn-green" onclick="goto('s-k3-q2')">→ Hitung Total Daya</button>
+  </div>
+</div>
+
+<!-- K3 Q1 B -->
+<div id="s-k3-q1-b" class="screen">
+  <div class="topbar"><span class="topbar-title">⚡ ElectroQuest</span><span class="score-box">⭐ <span id="score-k3-b">0</span> poin</span></div>
+  <div class="card-inner">
+    <div class="feedback-box hampir">
+      <div class="feedback-icon">⚠️</div>
+      <div class="feedback-title">Hampir!</div>
+      <div class="feedback-body">Pembagian tegangan itu terjadi pada rangkaian SERI, bukan paralel. Pada paralel, setiap cabang mendapat tegangan penuh dari sumber!</div>
+    </div>
+    <button class="btn btn-orange" onclick="goto('s-k3-q1')">🔄 Coba Lagi</button>
+  </div>
+</div>
+
+<!-- K3 Q1 C -->
+<div id="s-k3-q1-c" class="screen">
+  <div class="topbar"><span class="topbar-title">⚡ ElectroQuest</span><span class="score-box">⭐ <span id="score-k3-c">0</span> poin</span></div>
+  <div class="card-inner">
+    <div class="feedback-box salah">
+      <div class="feedback-icon">❌</div>
+      <div class="feedback-title">Belum Tepat</div>
+      <div class="feedback-body">Arus yang sama itu ciri rangkaian seri. Pada paralel, aruslah yang berbeda-beda, bukan tegangan.</div>
+    </div>
+    <div class="remedial-box">
+      <div class="remedial-title">📚 Remedial – Rangkaian Paralel</div>
+      <div class="remedial-body">
+        <div class="formula-display">V sama, I berbeda</div>
+        <p>Paralel = setiap cabang punya tegangan sama persis dengan sumber. Arus tiap cabang = V/R masing-masing.</p>
+      </div>
+    </div>
+    <button class="btn btn-red" onclick="goto('s-k3-q1')">🔄 Kembali ke Pertanyaan</button>
+  </div>
+</div>
+
+<!-- KASUS 3 – Q2 (HITUNG DAYA) -->
+<div id="s-k3-q2" class="screen">
+  <div class="topbar"><span class="topbar-title">⚡ ElectroQuest</span><span class="score-box">⭐ <span id="score-k3-q2">0</span> poin</span></div>
+  <div class="card-inner">
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Simpul 2 – Total Daya Listrik</span><span>2/2</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+    </div>
+    <div class="calc-box">
+      <div class="calc-soal">Diketahui daya perangkat:</div>
+      <div class="calc-circuit">📺 TV = 100W &nbsp;|&nbsp; 🧊 Kulkas = 150W &nbsp;|&nbsp; ❄️ AC = 400W</div>
+      <div class="rumus-box">Rumus: <span>P total = P1 + P2 + P3</span></div>
+      <div class="calc-soal" style="margin-bottom:12px;">Hitung total daya listrik yang digunakan (dalam Watt)!</div>
+      <div class="calc-input-row">
+        <input class="calc-input" id="jawaban-k3" type="number" placeholder="?" />
+        <div class="calc-unit">Watt (W)</div>
+      </div>
+    </div>
+    <button class="btn btn-blue" onclick="cekJawabanK3()">✓ CEK JAWABAN</button>
+    <div id="feedback-k3" style="margin-top:16px; display:none;"></div>
+    <div id="btn-lanjut-k3" style="display:none; margin-top:12px;">
+      <button class="btn btn-green" onclick="selesaiSemua()">🏆 Selesaikan Petualangan!</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN FINAL
+══════════════════════════════════════ -->
+<div id="s-final" class="screen">
+  <div class="card">
+    <div style="text-align:center; padding: 10px 0 20px;">
+      <div style="font-size: 64px; margin-bottom: 10px;">🏆</div>
+      <div style="font-family:'Bangers',cursive; font-size: 42px; color: var(--yellow); letter-spacing:2px;">PETUALANGAN SELESAI!</div>
+      <div style="font-size: 14px; color: var(--muted); margin-top: 6px;">Kota Voltara kini aman berkat jasamu, <span id="nama-final" style="color:var(--yellow);font-weight:800;">Teknisi</span>!</div>
+    </div>
+
+    <div class="result-row" style="flex-direction:column; text-align:center; gap:6px;">
+      <div style="font-size:13px; color:var(--muted);">SKOR TOTAL</div>
+      <div style="font-family:'Bangers',cursive; font-size:72px; color:var(--yellow);" id="skor-total-display">0</div>
+      <div style="font-size: 13px; color: var(--muted);">dari 600 poin maksimum</div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
+      <div class="badge-box"><div class="badge-icon">🏅</div><div class="badge-name">Ahli Rangkaian Dasar</div></div>
+      <div class="badge-box"><div class="badge-icon">⚡</div><div class="badge-name">Ahli Rangkaian Seri</div></div>
+      <div class="badge-box"><div class="badge-icon">🌟</div><div class="badge-name">Master Daya Listrik</div></div>
+    </div>
+
+    <div class="narasi-box" style="border-color: var(--purple); text-align:center;">
+      <p>Kamu telah menguasai: <strong>Hukum Ohm</strong>, <strong>Rangkaian Seri</strong>, dan <strong>Daya Listrik Paralel</strong>.</p>
+      <p style="margin-top:8px;">Voltara bangga punya teknisi muda sepertimu! ⚡</p>
+    </div>
+
+    <button class="btn btn-yellow" onclick="mainLagi()">
+      <span class="btn-icon">🔄</span> MAIN LAGI
+    </button>
+  </div>
+</div>
+
+<script>
+  let state = { nama: 'Raka', kelas: '', skor: 0 };
+
+  function goto(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    updateScores();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateScores() {
+    document.querySelectorAll('[id^="score-"]').forEach(el => {
+      el.textContent = state.skor;
+    });
+  }
+
+  function showPoin(jumlah) {
+    const el = document.createElement('div');
+    el.className = 'poin-popup';
+    el.textContent = '+' + jumlah + ' POIN!';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1500);
+  }
+
+  function doLogin() {
+    const nama = document.getElementById('input-nama').value.trim();
+    const kelas = document.getElementById('input-kelas').value.trim();
+    if (!nama) { alert('Masukkan namamu dulu ya!'); return; }
+    state.nama = nama;
+    state.kelas = kelas;
+    document.querySelectorAll('[id^="nama-display"]').forEach(el => el.textContent = nama);
+    document.querySelectorAll('#nama-selesai, #nama-final').forEach(el => el.textContent = nama);
+    goto('s-k1-intro');
+  }
+
+  function k1q1Pilih(p) {
+    if (p === 'A') { state.skor += 100; showPoin(100); goto('s-k1-q1-a'); }
+    else if (p === 'B') goto('s-k1-q1-b');
+    else goto('s-k1-q1-c');
+    updateScores();
+  }
+
+  function cekJawaban() {
+    const val = parseFloat(document.getElementById('jawaban-hitung').value);
+    const fb = document.getElementById('feedback-hitung');
+    fb.style.display = 'block';
+    if (val === 2) {
+      state.skor += 100; showPoin(100); updateScores();
+      fb.innerHTML = `<div class="feedback-box benar"><div class="feedback-icon">✅</div><div class="feedback-title">Jawaban Benar! +100 Poin</div><div class="feedback-body">I = V/R = 12/6 = <strong>2 Ampere</strong>. Pak Hasan sangat lega!</div></div>`;
+      document.getElementById('btn-lanjut-k1').style.display = 'block';
+    } else {
+      fb.innerHTML = `<div class="feedback-box salah"><div class="feedback-icon">❌</div><div class="feedback-title">Belum Tepat</div><div class="feedback-body">Ingat rumus: I = V/R = 12/6 = ? Coba lagi!</div></div>`;
+    }
+  }
+
+  function selesaiKasus1() {
+    document.getElementById('skor-k1-display').textContent = state.skor;
+    document.getElementById('nama-selesai').textContent = state.nama;
+    goto('s-k1-selesai');
+  }
+
+  function k2q1Pilih(p) {
+    if (p === 'A') { state.skor += 100; showPoin(100); goto('s-k2-q1-a'); }
+    else if (p === 'B') goto('s-k2-q1-b');
+    else goto('s-k2-q1-c');
+    updateScores();
+  }
+
+  function cekJawabanK2() {
+    const val = parseFloat(document.getElementById('jawaban-k2').value);
+    const fb = document.getElementById('feedback-k2');
+    fb.style.display = 'block';
+    if (val === 2) {
+      state.skor += 100; showPoin(100); updateScores();
+      fb.innerHTML = `<div class="feedback-box benar"><div class="feedback-icon">✅</div><div class="feedback-title">Benar! +100 Poin</div><div class="feedback-body">I = V/R = 24/12 = <strong>2 Ampere</strong>. Lampu Bu Dewi kini normal!</div></div>`;
+      document.getElementById('btn-lanjut-k2').style.display = 'block';
+    } else {
+      fb.innerHTML = `<div class="feedback-box salah"><div class="feedback-icon">❌</div><div class="feedback-title">Belum Tepat</div><div class="feedback-body">Gunakan: I = V/R = 24/12 = ? Coba lagi!</div></div>`;
+    }
+  }
+
+  function selesaiKasus2() {
+    document.getElementById('skor-k2-display').textContent = state.skor;
+    goto('s-k2-selesai');
+  }
+
+  function k3q1Pilih(p) {
+    if (p === 'A') { state.skor += 100; showPoin(100); goto('s-k3-q1-a'); }
+    else if (p === 'B') goto('s-k3-q1-b');
+    else goto('s-k3-q1-c');
+    updateScores();
+  }
+
+  function cekJawabanK3() {
+    const val = parseInt(document.getElementById('jawaban-k3').value);
+    const fb = document.getElementById('feedback-k3');
+    fb.style.display = 'block';
+    if (val === 650) {
+      state.skor += 100; showPoin(100); updateScores();
+      fb.innerHTML = `<div class="feedback-box benar"><div class="feedback-icon">✅</div><div class="feedback-title">Benar! +100 Poin</div><div class="feedback-body">P total = 100 + 150 + 400 = <strong>650 Watt</strong>. Ibu Sari sekarang tahu cara menghemat listrik!</div></div>`;
+      document.getElementById('btn-lanjut-k3').style.display = 'block';
+    } else {
+      fb.innerHTML = `<div class="feedback-box salah"><div class="feedback-icon">❌</div><div class="feedback-title">Belum Tepat</div><div class="feedback-body">Jumlahkan semua daya: 100 + 150 + 400 = ? Watt. Coba lagi!</div></div>`;
+    }
+  }
+
+  function selesaiSemua() {
+    document.getElementById('skor-total-display').textContent = state.skor;
+    document.getElementById('nama-final').textContent = state.nama;
+    goto('s-final');
+  }
+
+  function mainLagi() {
+    state = { nama: 'Raka', kelas: '', skor: 0 };
+    document.getElementById('input-nama').value = '';
+    document.getElementById('input-kelas').value = '';
+    document.getElementById('feedback-hitung').style.display = 'none';
+    document.getElementById('btn-lanjut-k1').style.display = 'none';
+    document.getElementById('feedback-k2').style.display = 'none';
+    document.getElementById('btn-lanjut-k2').style.display = 'none';
+    document.getElementById('feedback-k3').style.display = 'none';
+    document.getElementById('btn-lanjut-k3').style.display = 'none';
+    goto('s-beranda');
+  }
+</script>
+</body>
+</html>
