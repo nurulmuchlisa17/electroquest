@@ -809,6 +809,10 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif
   <!-- HUD -->
   <div class="vn-hud">
     <div class="hud-left">⚡ ElectroQuest</div>
+    <button id="btn-audio" onclick="toggleAudio()" title="Matikan suara"
+      style="background:transparent;border:1px solid rgba(255,255,255,.15);
+      border-radius:99px;padding:4px 10px;color:#fff;font-size:14px;
+      cursor:pointer;margin-left:8px;">🔊</button>
     <div class="hud-right">
       <div class="hud-pill2">⭐ <span id="skor-vn">0</span></div>
       <button class="btn-worldmap" onclick="backToWorld()">🗺 Peta</button>
@@ -964,6 +968,7 @@ function showPoin(n){
   el.className='poin-popup';
   el.textContent='+'+n+' POIN!';
   document.body.appendChild(el);
+  playPoin();
   setTimeout(()=>el.remove(),1700);
 }
 
@@ -1334,7 +1339,7 @@ function jalankanKasus1(){
   const hanya_raka = (e)=>`<div class="char-wrap active" style="margin:0 auto;">${getCharPlayer()}</div>`;
 
   function k1_selesai(){
-    G.skor+=100; showPoin(100); updateHUD();
+    G.skor+=100; showPoin(100); updateHUD(); playBenar();
     runNode({type:'dialogue', speaker:'Pak Hasan', color:'#f39c12',
       chars: `<div class="char-wrap inactive">${getCharPlayer()}</div><div class="char-wrap active">${getCharHasan()}</div>`,
       text:'Alhamdulillah... lampunya terang lagi! Terima kasih banyak, Nak. Rumahku jadi terang kembali!',
@@ -1353,7 +1358,7 @@ function jalankanKasus1(){
       unit:'Ampere (A)',
       jawaban:2,
       onBenar:()=>{
-        G.skor+=100; showPoin(100); updateHUD();
+        G.skor+=100; showPoin(100); updateHUD(); playBenar();
         runNode({type:'dialogue', speaker:G.karNama, color:'#2ecc71',
           chars: `<div class="char-wrap active">${getCharPlayer()}</div><div class="char-wrap inactive">${getCharHasan()}</div>`,
           text:'I = V/R = 12/6 = 2 Ampere! Dengan hambatan 6Ω dan tegangan 12V, arusnya hanya 2A — terlalu kecil untuk menerangi lampu dengan baik. Kita perlu ganti kabel yang hambatannya lebih rendah!',
@@ -1372,7 +1377,7 @@ function jalankanKasus1(){
       next:()=>runNode({type:'choice',
         chars: `<div class="char-wrap inactive">${getCharPlayer()}</div><div class="char-wrap active">${getCharHasan()}</div>`,
         choices:[
-          {key:'A', text:'Hambatan terlalu besar → arus kecil → lampu redup', action:()=>{ G.skor+=50; showPoin(50); updateHUD(); k1_hitung(); }},
+          {key:'A', text:'Hambatan terlalu besar → arus kecil → lampu redup', action:()=>{ G.skor+=50; showPoin(50); updateHUD(); playBenar(); k1_hitung(); }},
           {key:'B', text:'Tegangan sumber yang terlalu lemah', action:()=>k1_remedial()},
           {key:'C', text:'Tidak ada arus yang mengalir sama sekali', action:()=>k1_remedial()},
         ]
@@ -1396,7 +1401,7 @@ function jalankanKasus1(){
         showChoicesWithImg([
           {key:'A', img:IMG_VOLTMETER,   nama:'Voltmeter',   sub:'Mengukur Tegangan (V) · Dipasang Paralel',
             action:()=>{
-              G.skor+=100; showPoin(100); updateHUD();
+              G.skor+=100; showPoin(100); updateHUD(); playBenar();
               runNode({type:'dialogue', speaker:G.karNama, color:'#2ecc71',
                 chars:`<div class="char-wrap active">${getCharPlayer()}</div><div class="char-wrap inactive">${getCharHasan()}</div>`,
                 text:`Benar! Voltmeter untuk mengukur tegangan. Dipasang PARALEL dengan komponen yang diukur. +100 poin!`,
@@ -1409,7 +1414,7 @@ function jalankanKasus1(){
                 chars:`<div class="char-wrap active">${getCharPlayer()}</div><div class="char-wrap inactive">${getCharHasan()}</div>`,
                 text:`Hampir! Amperemeter untuk mengukur ARUS, bukan tegangan. Kita butuh alat yang berbeda!`,
                 next:soalAlatUkurRemedial
-              });
+              }); playSalah(); playSalah();
             }},
           {key:'C', img:IMG_OHMMETER,    nama:'Ohmmeter',    sub:'Mengukur Hambatan (Ω)',
             action:()=>{
@@ -1417,7 +1422,7 @@ function jalankanKasus1(){
                 chars:`<div class="char-wrap active">${getCharPlayer()}</div><div class="char-wrap inactive">${getCharHasan()}</div>`,
                 text:`Ohmmeter untuk mengukur hambatan, bukan tegangan. Kita butuh alat yang lain!`,
                 next:soalAlatUkurRemedial
-              });
+              }); playSalah();
             }},
         ]);}
       })
@@ -1433,7 +1438,7 @@ function jalankanKasus1(){
         chars:`<div class="char-wrap inactive">${getCharPlayer()}</div><div class="char-wrap active">${getCharHasan()}</div>`,
         choices:[
           {key:'A', text:'Voltmeter — dipasang paralel, untuk ukur tegangan', action:()=>{
-            G.skor+=50; showPoin(50); updateHUD();
+            G.skor+=50; showPoin(50); updateHUD(); playBenar();
             runNode({type:'dialogue', speaker:G.karNama, color:'#2ecc71',
               chars:`<div class="char-wrap active">${getCharPlayer()}</div><div class="char-wrap inactive">${getCharHasan()}</div>`,
               text:'Benar! Voltmeter untuk tegangan, dipasang paralel. +50 poin. Ayo lanjutkan!',
@@ -1458,7 +1463,7 @@ function jalankanKasus1(){
           chars:`<div class="char-wrap inactive">${getCharPlayer()}</div><div class="char-wrap active">${getCharHasan()}</div>`,
           choices:[
             {key:'A', text:'Hambatan kabel terlalu besar, sehingga arus yang mengalir kecil', action:()=>{
-              G.skor+=100; showPoin(100); updateHUD();
+              G.skor+=100; showPoin(100); updateHUD(); playBenar();
               runNode({type:'dialogue', speaker:G.karNama, color:'#2ecc71',
                 chars:`<div class="char-wrap active">${getCharPlayer()}</div><div class="char-wrap inactive">${getCharHasan()}</div>`,
                 text:'Tepat! Hambatan besar → arus kecil → lampu redup. Sesuai Hukum Ohm: I = V/R. Sekarang buktikan dengan menghitung arusnya!',
@@ -1470,14 +1475,14 @@ function jalankanKasus1(){
                 chars:`<div class="char-wrap inactive">${getCharPlayer()}</div><div class="char-wrap active">${getCharHasan()}</div>`,
                 text:'Tegangan sumbernya 12V stabil. Yang bermasalah bukan sumbernya. Pikirkan lagi hubungan hambatan dengan arus!',
                 next:k1_remedial
-              });
+              }); playSalah();
             }},
             {key:'C', text:'Tidak ada arus yang mengalir sama sekali', action:()=>{
               runNode({type:'dialogue', speaker:G.karNama, color:'#e74c3c',
                 chars:`<div class="char-wrap active">${getCharPlayer()}</div><div class="char-wrap inactive">${getCharHasan()}</div>`,
                 text:'Kalau tidak ada arus, lampu tidak menyala sama sekali — bukan redup. Arus ada tapi kecil. Pelajari Hukum Ohm!',
                 next:k1_remedial
-              });
+              }); playSalah();
             }},
           ]
         })
@@ -1491,7 +1496,7 @@ function jalankanKasus2(){
   setBG('bg-kota');
 
   function k2_selesai(){
-    G.skor+=100; showPoin(100); updateHUD();
+    G.skor+=100; showPoin(100); updateHUD(); playBenar();
     runNode({type:'dialogue', speaker:'Bu Dewi', color:'#e91e8c',
       chars:`<div class="char-wrap inactive">${getCharPlayer()}</div><div class="char-wrap active">${getCharDewi()}</div>`,
       text:`Wah! Lampunya sekarang terang merata! Alhamdulillah, warungku jadi terang lagi. Pelangganku pasti senang, Nak ${G.karNama}!`,
@@ -1510,7 +1515,7 @@ function jalankanKasus2(){
       unit:'Ampere (A)',
       jawaban:2,
       onBenar:()=>{
-        G.skor+=100; showPoin(100); updateHUD();
+        G.skor+=100; showPoin(100); updateHUD(); playBenar();
         runNode({type:'dialogue', speaker:G.karNama, color:'#2ecc71',
           chars:`<div class="char-wrap active">${getCharPlayer()}</div><div class="char-wrap inactive">${getCharDewi()}</div>`,
           text:'I = V/R = 24/12 = 2 Ampere. Arus 2A terbagi antara 3 lampu secara berurutan. Sekarang kita ganti kabel yang hambatannya lebih kecil, dan lampu Bu Dewi akan kembali terang!',
@@ -1527,7 +1532,7 @@ function jalankanKasus2(){
       next:()=>runNode({type:'choice',
         chars:`<div class="char-wrap inactive">${getCharPlayer()}</div><div class="char-wrap active">${getCharDewi()}</div>`,
         choices:[
-          {key:'A', text:'12 Ω — jumlahkan semua hambatan (4+6+2)', action:()=>{ G.skor+=100; showPoin(100); updateHUD();
+          {key:'A', text:'12 Ω — jumlahkan semua hambatan (4+6+2)', action:()=>{ G.skor+=100; showPoin(100); updateHUD(); playBenar();
             runNode({type:'dialogue', speaker:G.karNama, color:'#2ecc71',
               chars:`<div class="char-wrap active">${getCharPlayer()}</div><div class="char-wrap inactive">${getCharDewi()}</div>`,
               text:'Tepat! Rtotal = 4+6+2 = 12Ω. Pada rangkaian seri semua hambatan dijumlahkan karena arus hanya punya satu jalur. Sekarang hitung arusnya!',
@@ -1569,12 +1574,12 @@ function jalankanKasus2(){
           next:()=>runNode({type:'choice',
             chars:`<div class="char-wrap inactive">${getCharPlayer()}</div><div class="char-wrap active">${getCharDewi()}</div>`,
             choices:[
-              {key:'A', text:'Hambatan total = jumlah semua hambatan (seri)', action:()=>{ G.skor+=100; showPoin(100); updateHUD();
+              {key:'A', text:'Hambatan total = jumlah semua hambatan (seri)', action:()=>{ G.skor+=100; showPoin(100); updateHUD(); playBenar();
                 runNode({type:'dialogue', speaker:'Bu Dewi', color:'#e91e8c',
                   chars:`<div class="char-wrap inactive">${getCharPlayer()}</div><div class="char-wrap active">${getCharDewi()}</div>`,
                   text:'Oh iya! Jadi hambatannya dijumlah semua ya, Nak? Lalu berapa hambatan totalnya?',
                   next:k2_q2
-                });
+                }); playSalah();
               }},
               {key:'B', text:'Hambatan total = hambatan terbesar saja', action:()=>{
                 runNode({type:'dialogue', speaker:G.karNama, color:'#f39c12',
@@ -1583,7 +1588,7 @@ function jalankanKasus2(){
                   next:()=>runNode({type:'choice',
                     chars:`<div class="char-wrap inactive">${getCharPlayer()}</div><div class="char-wrap active">${getCharDewi()}</div>`,
                     choices:[
-                      {key:'A', text:'Oh, jadi dijumlah semua ya!', action:()=>{ G.skor+=50; showPoin(50); updateHUD(); k2_q2(); }},
+                      {key:'A', text:'Oh, jadi dijumlah semua ya!', action:()=>{ G.skor+=50; showPoin(50); updateHUD(); playBenar(); k2_q2(); }},
                     ]
                   })
                 });
@@ -1592,7 +1597,7 @@ function jalankanKasus2(){
                 runNode({type:'dialogue', speaker:G.karNama, color:'#e74c3c',
                   chars:`<div class="char-wrap active">${getCharPlayer()}</div><div class="char-wrap inactive">${getCharDewi()}</div>`,
                   text:'Itu berlaku untuk rangkaian paralel, Bu. Pada seri: hambatan total = R1+R2+R3. Semua dijumlahkan!',
-                  next:()=>{ G.skor+=50; showPoin(50); updateHUD(); k2_q2(); }
+                  next:()=>{ G.skor+=50; showPoin(50); updateHUD(); playBenar(); k2_q2(); }
                 });
               }},
             ]
@@ -1608,7 +1613,7 @@ function jalankanKasus3(){
   setBG('bg-klinik');
 
   function k3_selesai(){
-    G.skor+=200; showPoin(200); updateHUD();
+    G.skor+=200; showPoin(200); updateHUD(); playBenar();
     flash('#ff0000');
     runNode({type:'dialogue', speaker:'Bidan Aty', color:'#3498db',
       chars:`<div class="char-wrap inactive">${getCharPlayer()}</div><div class="char-wrap active">${getCharBidanAty()}</div>`,
@@ -1629,7 +1634,7 @@ function jalankanKasus3(){
       unit:'Watt (W)',
       jawaban:2000,
       onBenar:()=>{
-        G.skor+=100; showPoin(100); updateHUD();
+        G.skor+=100; showPoin(100); updateHUD(); playBenar();
         runNode({type:'dialogue', speaker:G.karNama, color:'#2ecc71',
           chars:`<div class="char-wrap active">${getCharPlayer()}</div><div class="char-wrap inactive">${getCharBidanAty()}</div>`,
           text:`P total = 1000+200+800 = 2000 Watt = 2 kW! Klinik memakai daya sangat besar. Colokan yang meledak karena kelebihan beban — MCB harus disesuaikan. Sekarang ${G.karNama} pasang pengaman yang benar!`,
@@ -1646,7 +1651,7 @@ function jalankanKasus3(){
       next:()=>runNode({type:'choice',
         chars:`<div class="char-wrap inactive">${getCharPlayer()}</div><div class="char-wrap active">${getCharBidanAty()}</div>`,
         choices:[
-          {key:'A', text:'Tegangan di setiap cabang SAMA dengan sumber (220V)', action:()=>{ G.skor+=100; showPoin(100); updateHUD();
+          {key:'A', text:'Tegangan di setiap cabang SAMA dengan sumber (220V)', action:()=>{ G.skor+=100; showPoin(100); updateHUD(); playBenar();
             runNode({type:'dialogue', speaker:G.karNama, color:'#2ecc71',
               chars:`<div class="char-wrap active">${getCharPlayer()}</div><div class="char-wrap inactive">${getCharBidanAty()}</div>`,
               text:'Benar! Paralel = tegangan tiap cabang sama dengan sumber. Itulah kenapa semua perangkat klinik bisa bekerja penuh. Sekarang hitung total dayanya!',
@@ -1689,26 +1694,26 @@ function jalankanKasus3(){
           next:()=>runNode({type:'choice',
             chars:`<div class="char-wrap inactive">${getCharPlayer()}</div><div class="char-wrap active">${getCharBidanAty()}</div>`,
             choices:[
-              {key:'A', text:'Setiap perangkat mendapat tegangan penuh 220V dan arus berbeda-beda', action:()=>{ G.skor+=100; showPoin(100); updateHUD();
+              {key:'A', text:'Setiap perangkat mendapat tegangan penuh 220V dan arus berbeda-beda', action:()=>{ G.skor+=100; showPoin(100); updateHUD(); playBenar();
                 runNode({type:'dialogue', speaker:'Bidan Aty', color:'#3498db',
                   chars:`<div class="char-wrap inactive">${getCharPlayer()}</div><div class="char-wrap active">${getCharBidanAty()}</div>`,
                   text:'Oh! Jadi semua perangkat dapat tegangan penuh, tapi arusnya berbeda? Pantas saja colokannya tidak kuat — beban totalnya terlalu besar!',
                   next:k3_q2
-                });
+                }); playSalah();
               }},
               {key:'B', text:'Tegangan dibagi rata, jadi tiap perangkat hanya dapat sebagian', action:()=>{
                 runNode({type:'dialogue', speaker:G.karNama, color:'#f39c12',
                   chars:`<div class="char-wrap active">${getCharPlayer()}</div><div class="char-wrap inactive">${getCharBidanAty()}</div>`,
                   text:'Bukan begitu, Bu! Tegangan dibagi terjadi di rangkaian SERI. Di sini paralel — tiap perangkat dapat 220V penuh. Itu kenapa beban totalnya sangat besar!',
                   next:k3_q2
-                });
+                }); playSalah();
               }},
               {key:'C', text:'Kalau satu perangkat mati, semua ikut mati', action:()=>{
                 runNode({type:'dialogue', speaker:G.karNama, color:'#e74c3c',
                   chars:`<div class="char-wrap active">${getCharPlayer()}</div><div class="char-wrap inactive">${getCharBidanAty()}</div>`,
                   text:'Itu justru kelebihan paralel — kalau satu mati, lain tetap hidup. Yang jadi masalah adalah TOTAL DAYA yang ditanggung kabel!',
                   next:k3_q2
-                });
+                }); playSalah();
               }},
             ]
           })
@@ -1724,6 +1729,7 @@ function jalankanKasus3(){
 const BADGES_EARNED = [];
 function tampilResult({kasus, icon, title, badge, badgeIcon}){
   G.kasusSelesai.push(kasus);
+  playFanfare();
   if(!BADGES_EARNED.includes(badge)) BADGES_EARNED.push(badge);
 
   document.getElementById('res-icon').textContent=icon;
@@ -1759,6 +1765,121 @@ async function kirimKeSheets(nilai){
 
 
 
+
+// ═══════════════════════════
+// SISTEM AUDIO
+// ═══════════════════════════
+let audioCtx = null;
+let bgmAudio = null;
+let audioEnabled = true;
+
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// ── Efek suara via Web Audio API ──
+function playBenar(){
+  if(!audioEnabled) return;
+  const ctx = getAudioCtx();
+  // Nada naik: do-mi-sol
+  [[523,0],[659,0.15],[784,0.3]].forEach(([freq,delay])=>{
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value=freq; o.type='sine';
+    g.gain.setValueAtTime(0,ctx.currentTime+delay);
+    g.gain.linearRampToValueAtTime(0.3,ctx.currentTime+delay+0.05);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.4);
+    o.start(ctx.currentTime+delay);
+    o.stop(ctx.currentTime+delay+0.4);
+  });
+}
+
+function playSalah(){
+  if(!audioEnabled) return;
+  const ctx = getAudioCtx();
+  // Nada turun: bzzz
+  [[300,0],[220,0.15]].forEach(([freq,delay])=>{
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value=freq; o.type='sawtooth';
+    g.gain.setValueAtTime(0,ctx.currentTime+delay);
+    g.gain.linearRampToValueAtTime(0.2,ctx.currentTime+delay+0.05);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.35);
+    o.start(ctx.currentTime+delay);
+    o.stop(ctx.currentTime+delay+0.35);
+  });
+}
+
+function playPoin(){
+  if(!audioEnabled) return;
+  const ctx = getAudioCtx();
+  // Ting! nada tinggi pendek
+  const o=ctx.createOscillator(), g=ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.frequency.setValueAtTime(1200,ctx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(800,ctx.currentTime+0.15);
+  o.type='sine';
+  g.gain.setValueAtTime(0.4,ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
+  o.start(ctx.currentTime);
+  o.stop(ctx.currentTime+0.3);
+}
+
+function playFanfare(){
+  if(!audioEnabled) return;
+  const ctx = getAudioCtx();
+  // Fanfare: do-mi-sol-do tinggi
+  [[523,0,0.15],[659,0.18,0.15],[784,0.36,0.15],[1047,0.54,0.5],
+   [784,0.72,0.1],[1047,0.82,0.6]].forEach(([freq,delay,dur])=>{
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value=freq; o.type='sine';
+    g.gain.setValueAtTime(0,ctx.currentTime+delay);
+    g.gain.linearRampToValueAtTime(0.35,ctx.currentTime+delay+0.04);
+    g.gain.setValueAtTime(0.35,ctx.currentTime+delay+dur-0.05);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+dur);
+    o.start(ctx.currentTime+delay);
+    o.stop(ctx.currentTime+delay+dur+0.05);
+  });
+}
+
+// ── BGM ──
+// Sumber: Pixabay bebas royalti
+const BGM_URL = 'https://cdn.pixabay.com/audio/2024/02/28/audio_a35d70a97a.mp3';
+
+function startBGM(){
+  if(!audioEnabled || bgmAudio) return;
+  bgmAudio = new Audio(BGM_URL);
+  bgmAudio.loop = true;
+  bgmAudio.volume = 0.25;
+  bgmAudio.play().catch(()=>{});
+}
+
+function stopBGM(){
+  if(bgmAudio){ bgmAudio.pause(); bgmAudio.currentTime=0; bgmAudio=null; }
+}
+
+function toggleAudio(){
+  audioEnabled = !audioEnabled;
+  const btn = document.getElementById('btn-audio');
+  if(audioEnabled){
+    btn.textContent='🔊';
+    btn.title='Matikan suara';
+    startBGM();
+  } else {
+    btn.textContent='🔇';
+    btn.title='Nyalakan suara';
+    stopBGM();
+  }
+}
+
+// Auto-start BGM saat user pertama kali interaksi
+document.addEventListener('click', function startOnce(){
+  if(audioEnabled) startBGM();
+  document.removeEventListener('click', startOnce);
+}, {once:true});
+
 // ═══════════════════════════
 // MATERI LISTRIK
 // ═══════════════════════════
@@ -1779,7 +1900,7 @@ const MATERI = [
     ],
     rumus:'I = Q / t',
     rumus_ket:'I = Arus (A) · Q = Muatan listrik (Coulomb) · t = waktu (s)',
-    video:'https://www.youtube.com/embed/mc979OhitAg'
+    video:'https://www.youtube.com/embed/LuaBXYfcCNk'
   },
   {
     id:'ohm',
@@ -1796,41 +1917,30 @@ const MATERI = [
     ],
     rumus:'V = I × R',
     rumus_ket:'V = Tegangan (V) · I = Arus (A) · R = Hambatan (Ω)',
-    video:'https://www.youtube.com/embed/8jB6hDLmHMI'
+    video:'https://www.youtube.com/embed/iNEFhwP_gS0'
   },
   {
-    id:'seri',
-    icon:'🔗', color:'rgba(155,89,182,.25)', iconColor:'#9b59b6',
-    title:'Rangkaian Seri',
-    sub:'Komponen tersambung dalam satu jalur',
+    id:'rangkaian',
+    icon:'🔌', color:'rgba(155,89,182,.25)', iconColor:'#9b59b6',
+    title:'Rangkaian Listrik',
+    sub:'Rangkaian Seri & Paralel',
     poin:[
-      'Rangkaian seri: komponen terhubung berurutan dalam satu jalur',
-      'Arus yang mengalir di setiap komponen SAMA besar',
-      'Tegangan total = jumlah tegangan di setiap komponen',
-      'Hambatan total = R1 + R2 + R3 + ...',
+      '⸻ RANGKAIAN SERI ⸻',
+      'Komponen terhubung berurutan dalam satu jalur',
+      'Arus di setiap komponen SAMA besar',
+      'Tegangan total = jumlah tegangan tiap komponen',
+      'Hambatan total = R1 + R2 + R3',
       'Jika satu komponen putus, semua komponen mati',
-      'Contoh: lampu hias seri, pengkabelan lama',
-    ],
-    rumus:'Rtotal = R1 + R2 + R3',
-    rumus_ket:'Hambatan seri dijumlahkan · Arus sama di setiap titik',
-    video:'https://www.youtube.com/embed/VV6tZ3Aqfuc'
-  },
-  {
-    id:'paralel',
-    icon:'⚙️', color:'rgba(230,126,34,.25)', iconColor:'#e67e22',
-    title:'Rangkaian Paralel',
-    sub:'Komponen tersambung dalam beberapa jalur',
-    poin:[
-      'Rangkaian paralel: komponen terhubung dalam jalur terpisah',
-      'Tegangan di setiap cabang SAMA dengan tegangan sumber',
+      '⸻ RANGKAIAN PARALEL ⸻',
+      'Komponen terhubung dalam jalur-jalur terpisah',
+      'Tegangan di setiap cabang SAMA dengan sumber',
       'Arus total = jumlah arus di setiap cabang',
       'Hambatan total lebih kecil dari hambatan terkecil',
-      'Jika satu komponen mati, komponen lain tetap menyala',
-      'Contoh: instalasi listrik rumah, peralatan elektronik',
+      'Jika satu komponen mati, komponen lain tetap hidup',
     ],
-    rumus:'1/Rtotal = 1/R1 + 1/R2 + 1/R3',
-    rumus_ket:'Tegangan sama di setiap cabang · Arus terbagi',
-    video:'https://www.youtube.com/embed/ZRLXDiiUv8Q'
+    rumus:'Seri: Rtotal = R1+R2+R3  |  Paralel: 1/Rtotal = 1/R1+1/R2+1/R3',
+    rumus_ket:'Seri: Arus sama, tegangan terbagi · Paralel: Tegangan sama, arus terbagi',
+    video:'https://www.youtube.com/embed/HPVWZtUIuos'
   },
   {
     id:'daya',
@@ -1847,7 +1957,7 @@ const MATERI = [
     ],
     rumus:'P = V × I',
     rumus_ket:'P = Daya (W) · V = Tegangan (V) · I = Arus (A) · atau P = I²R = V²/R',
-    video:'https://www.youtube.com/embed/OGRaw9_COTI'
+    video:'https://www.youtube.com/embed/I9iZ1wr5dac'
   },
 ];
 
